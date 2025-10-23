@@ -63,8 +63,8 @@ interface InputFeature {
 }
 
 let INPUTS: {[name: string]: InputFeature} = {
-  "x": {f: (x, y) => x, label: "X_1"},
-  "y": {f: (x, y) => y, label: "X_2"},
+  "x": {f: (x, y) => x, label: "x"},
+  "y": {f: (x, y) => y, label: "y"},
   // "xSquared": {f: (x, y) => x * x, label: "X_1^2"},
   // "ySquared": {f: (x, y) => y * y,  label: "X_2^2"},
   // "xTimesY": {f: (x, y) => x * y, label: "X_1X_2"},
@@ -442,6 +442,13 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
       width: RECT_SIZE,
       height: RECT_SIZE,
     });
+
+  if (isInput && (nodeId === "x" || nodeId === "y")) {
+    nodeGroup.select("rect")
+      .style("fill", "none")
+      .style("stroke", "none");
+  }
+
   let activeOrNotClass = state[nodeId] ? "active" : "inactive";
   if (isInput) {
     let label = INPUTS[nodeId].label != null ?
@@ -491,6 +498,10 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
       }).on("mouseleave", function() {
         updateHoverCard(null);
       });
+  }
+
+  if (isInput && (nodeId === "x" || nodeId === "y")) {
+    return; // <- early exit: no .canvas div, no HeatMap
   }
 
   // Draw the node's canvas.
