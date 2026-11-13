@@ -188,34 +188,92 @@ const datasetJson: {[name: string]: string} = Object.create(null);
 
 function loadSavedDataset(name: string, randomize = false) {
   const data = readJson(`datasets/${name}.json`);
-  datasetJson[name] = JSON.stringify(data, null, 2);
-
   const points: Example2D[] = Array.isArray(data) ? data : data.examples;
 
-  if (!data.xWords || !data.yWords) {
+  if (!data.tokenization) {
+    datasetJson[name] = JSON.stringify(data, null, 2);
     return savedPoints(points);
   }
 
   wordDatasets[name] = true;
-  const words: string[] = data.xWords.concat(data.yWords);
-  const vocabulary = words.filter((word, i) => words.indexOf(word) === i);
-  if (randomize) shuffle(vocabulary);
 
-  const coordinate: {[word: string]: number} = Object.create(null);
-  vocabulary.forEach((word, i) => {
-    coordinate[word] = vocabulary.length === 1
-      ? 0
-      : -6 + 12 * i / (vocabulary.length - 1);
+  const words = Object.keys(data.tokenization)
+    .sort((a, b) => data.tokenization[a] - data.tokenization[b]);
+  const ids: number[] = words.map(word => data.tokenization[word]);
+  if (randomize) shuffle(words);
+
+  const tokenization: {[word: string]: number} = Object.create(null);
+  const newId: {[id: number]: number} = Object.create(null);
+
+  words.forEach((word, i) => {
+    tokenization[word] = ids[i];
+    newId[data.tokenization[word]] = ids[i];
   });
 
-  const remapped = points.map(point => ({
+  const examples = points.map(point => ({
     ...point,
-    x: coordinate[data.xWords[point.x]],
-    y: coordinate[data.yWords[point.y]]
+    x: newId[point.x],
+    y: newId[point.y]
   }));
 
-  return () => remapped.slice();
+  datasetJson[name] = JSON.stringify({...data, tokenization, examples}, null, 2);
+
+  const min = ids[0];
+  const max = ids[ids.length - 1];
+  const scale = (id: number) =>
+    min === max ? 0 : -6 + 12 * (id - min) / (max - min);
+
+  const plotted = examples.map(point => ({
+    ...point,
+    x: scale(point.x),
+    y: scale(point.y)
+  }));
+
+  return () => plotted.slice();
 }
+// function loadSavedDataset(name: string, randomize = false) {
+//   const data = readJson(`datasets/${name}.json`);
+//   //datasetJson[name] = JSON.stringify(data, null, 2);
+
+//   let dump = data;
+//   const tokens = data.tokenization;
+
+//   if (tokens) {
+//     const sorted: {[word: string]: number} = Object.create(null);
+//     for (const word of Object.keys(tokens).sort((a, b) => tokens[a] - tokens[b])) {
+//       sorted[word] = tokens[word];
+//     }
+//     dump = {...data, tokenization: sorted};
+//   }
+
+//   datasetJson[name] = JSON.stringify(dump, null, 2);
+
+//   const points: Example2D[] = Array.isArray(data) ? data : data.examples;
+
+//   if (!data.xWords || !data.yWords) {
+//     return savedPoints(points);
+//   }
+
+//   wordDatasets[name] = true;
+//   const words: string[] = data.xWords.concat(data.yWords);
+//   const vocabulary = words.filter((word, i) => words.indexOf(word) === i);
+//   if (randomize) shuffle(vocabulary);
+
+//   const coordinate: {[word: string]: number} = Object.create(null);
+//   vocabulary.forEach((word, i) => {
+//     coordinate[word] = vocabulary.length === 1
+//       ? 0
+//       : -6 + 12 * i / (vocabulary.length - 1);
+//   });
+
+//   const remapped = points.map(point => ({
+//     ...point,
+//     x: coordinate[data.xWords[point.x]],
+//     y: coordinate[data.yWords[point.y]]
+//   }));
+
+//   return () => remapped.slice();
+// }
 
 const datasetNames: string[] = readJson("dataset-index.json");
 
