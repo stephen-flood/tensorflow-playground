@@ -181,6 +181,38 @@ function savedPoints(points: Example2D[]) {
   return () => normalized.slice();
 }
 
+const wordDatasets: {[name: string]: boolean} = Object.create(null);
+let shuffleNumber = 0;
+
+function loadSavedDataset(name: string, randomize = false) {
+  const data = readJson(`datasets/${name}.json`);
+  const points: Example2D[] = Array.isArray(data) ? data : data.examples;
+
+  if (!data.xWords || !data.yWords) {
+    return savedPoints(points);
+  }
+
+  wordDatasets[name] = true;
+  const words: string[] = data.xWords.concat(data.yWords);
+  const vocabulary = words.filter((word, i) => words.indexOf(word) === i);
+  if (randomize) shuffle(vocabulary);
+
+  const coordinate: {[word: string]: number} = Object.create(null);
+  vocabulary.forEach((word, i) => {
+    coordinate[word] = vocabulary.length === 1
+      ? 0
+      : -6 + 12 * i / (vocabulary.length - 1);
+  });
+
+  const remapped = points.map(point => ({
+    ...point,
+    x: coordinate[data.xWords[point.x]],
+    y: coordinate[data.yWords[point.y]]
+  }));
+
+  return () => remapped.slice();
+}
+
 const datasetNames: string[] = readJson("dataset-index.json");
 
 for (const name of datasetNames) {
@@ -188,9 +220,11 @@ for (const name of datasetNames) {
     throw new Error(`Dataset name is already in use: ${name}`);
   }
 
-  const data = readJson(`datasets/${name}.json`);
-  const points: Example2D[] = Array.isArray(data) ? data : data.examples;
-  datasets[name] = savedPoints(points);
+//  const data = readJson(`datasets/${name}.json`);
+//  const points: Example2D[] = Array.isArray(data) ? data : data.examples;
+//  datasets[name] = savedPoints(points);
+  Math.seedrandom(`initial-word-layout:${name}`);
+  datasets[name] = loadSavedDataset(name, true);
 
   d3.select(".dataset-list").append("div")
     .attr("class", "dataset")
@@ -261,8 +295,25 @@ function makeGUI() {
     oneStep();
   });
 
+  // d3.select("#data-regen-button").on("click", () => {
+  //   generateData();
+  //   parametersChanged = true;
+  // });
+
   d3.select("#data-regen-button").on("click", () => {
-    generateData();
+    const name = getKeyFromValue(datasets, state.dataset);
+
+    if (state.problem === Problem.CLASSIFICATION && wordDatasets[name]) {
+      Math.seedrandom(`${state.seed}:words:${++shuffleNumber}`);
+      state.dataset = datasets[name] = loadSavedDataset(name, true);
+
+      drawDatasetThumbnails();
+      generateData(true); // Reuse the seed for the split and example order.
+      // reset();            // Rebuild the model from the same random state.
+    } else {
+      generateData();
+    }
+
     parametersChanged = true;
   });
 
