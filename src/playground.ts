@@ -184,8 +184,12 @@ function savedPoints(points: Example2D[]) {
 const wordDatasets: {[name: string]: boolean} = Object.create(null);
 let shuffleNumber = 0;
 
+const datasetJson: {[name: string]: string} = Object.create(null);
+
 function loadSavedDataset(name: string, randomize = false) {
   const data = readJson(`datasets/${name}.json`);
+  datasetJson[name] = JSON.stringify(data, null, 2);
+
   const points: Example2D[] = Array.isArray(data) ? data : data.examples;
 
   if (!data.xWords || !data.yWords) {
@@ -1226,6 +1230,12 @@ function generateData(firstTime = false) {
   testData = data.slice(splitIndex);
   heatMap.updatePoints(trainData);
   heatMap.updateTestPoints(state.showTestData ? testData : []);
+
+  const name = getKeyFromValue(datasets, state.dataset);
+  const json = state.problem === Problem.CLASSIFICATION ? datasetJson[name] : "";
+  const box = d3.select("#dataset-json");
+  box.property("hidden", !json);
+  box.select("pre").text(json || "");
 }
 
 let firstInteraction = true;
