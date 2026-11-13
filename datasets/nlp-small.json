@@ -1,0 +1,103 @@
+{
+  "xWords": [
+    "they",
+    "we",
+    "the",
+    "a",
+    "some",
+    "an",
+    "at",
+    "fish",
+    "in",
+    "is",
+    "took",
+    "was",
+    "work"
+  ],
+  "yWords": [
+    "fish",
+    "work",
+    "an",
+    "at",
+    "dawn",
+    "dusk",
+    "home",
+    "hour",
+    "huge",
+    "in",
+    "is",
+    "night",
+    "remains",
+    "tank",
+    "the",
+    "took",
+    "was"
+  ],
+  "sentences": [
+    "They fish at dawn.",
+    "We fish at dusk.",
+    "The fish was huge.",
+    "A fish is in the tank.",
+    "They work at night.",
+    "We work at home.",
+    "The work took an hour.",
+    "Some work remains."
+  ],
+  "grid": {
+    "x": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "y": [
+      0,
+      1
+    ],
+    "target": [
+      [
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        null
+      ],
+      [
+        1.0,
+        1.0,
+        0.0,
+        null,
+        0.0
+      ]
+    ]
+  },
+  "examples": [
+    {"x": 0, "y": 0, "label": 1, "sentence": 0},
+    {"x": 7, "y": 3, "label": -1, "sentence": 0},
+    {"x": 6, "y": 4, "label": -1, "sentence": 0},
+    {"x": 1, "y": 0, "label": 1, "sentence": 1},
+    {"x": 7, "y": 3, "label": -1, "sentence": 1},
+    {"x": 6, "y": 5, "label": -1, "sentence": 1},
+    {"x": 2, "y": 0, "label": -1, "sentence": 2},
+    {"x": 7, "y": 16, "label": 1, "sentence": 2},
+    {"x": 11, "y": 8, "label": -1, "sentence": 2},
+    {"x": 3, "y": 0, "label": -1, "sentence": 3},
+    {"x": 7, "y": 10, "label": 1, "sentence": 3},
+    {"x": 9, "y": 9, "label": -1, "sentence": 3},
+    {"x": 8, "y": 14, "label": -1, "sentence": 3},
+    {"x": 2, "y": 13, "label": -1, "sentence": 3},
+    {"x": 0, "y": 1, "label": 1, "sentence": 4},
+    {"x": 12, "y": 3, "label": -1, "sentence": 4},
+    {"x": 6, "y": 11, "label": -1, "sentence": 4},
+    {"x": 1, "y": 1, "label": 1, "sentence": 5},
+    {"x": 12, "y": 3, "label": -1, "sentence": 5},
+    {"x": 6, "y": 6, "label": -1, "sentence": 5},
+    {"x": 2, "y": 1, "label": -1, "sentence": 6},
+    {"x": 12, "y": 15, "label": 1, "sentence": 6},
+    {"x": 10, "y": 2, "label": -1, "sentence": 6},
+    {"x": 5, "y": 7, "label": -1, "sentence": 6},
+    {"x": 4, "y": 1, "label": -1, "sentence": 7},
+    {"x": 12, "y": 12, "label": 1, "sentence": 7}
+  ]
+}

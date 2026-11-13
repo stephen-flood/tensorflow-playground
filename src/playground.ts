@@ -143,6 +143,64 @@ class Player {
   }
 }
 
+// Begin: load json datasets
+function readJson(path: string) {
+  const request = new XMLHttpRequest();
+  request.open("GET", path, false); // Load synchronously.
+  request.send();
+
+  if (request.status < 200 || request.status >= 300) {
+    throw new Error(`${path}: HTTP ${request.status}`);
+  }
+
+  return JSON.parse(request.responseText);
+}
+
+function savedPoints(points: Example2D[]) {
+  let minX = Infinity, maxX = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
+
+  for (const {x, y} of points) {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  }
+
+  function scale(value: number, min: number, max: number) {
+    return min === max ? 0 : -6 + 12 * (value - min) / (max - min);
+  }
+
+  const normalized = points.map(point => ({
+    ...point,
+    x: scale(point.x, minX, maxX),
+    y: scale(point.y, minY, maxY)
+  }));
+
+  // Playground shuffles the returned array.
+  return () => normalized.slice();
+}
+
+const datasetNames: string[] = readJson("dataset-index.json");
+
+for (const name of datasetNames) {
+  if (name in datasets) {
+    throw new Error(`Dataset name is already in use: ${name}`);
+  }
+
+  const data = readJson(`datasets/${name}.json`);
+  const points: Example2D[] = Array.isArray(data) ? data : data.examples;
+  datasets[name] = savedPoints(points);
+
+  d3.select(".dataset-list").append("div")
+    .attr("class", "dataset")
+    .attr("title", name)
+    .append("canvas")
+    .attr("class", "data-thumbnail")
+    .attr("data-dataset", name);
+}
+// End: Load json datasets
+
 let state = State.deserializeState();
 
 // Filter out inputs that are hidden.
